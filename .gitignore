@@ -1,0 +1,30 @@
+node_modules/
+dist/
+bin/
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+store/
+.env
+*.log
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# scratch / archives
+*.rar
+*.zip
+*.tar.gz
+*.tmp
+srt-test.ts
+srt-vtt-test.ts
+
+# original CLI spec (project pivoted to web app — see README)
+spec.md

@@ -1,0 +1,26 @@
+{
+  "name": "yt-notes",
+  "version": "0.1.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Local web app: YouTube channel subtitles -> DeepSeek-summarized markdown notes, organized by groups.",
+  "scripts": {
+    "setup-bin": "node scripts/install-yt-dlp.mjs",
+    "dev": "node scripts/install-yt-dlp.mjs && tsx watch --no-warnings src/server.ts",
+    "start": "node scripts/install-yt-dlp.mjs && tsx --no-warnings src/server.ts",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node scripts/install-yt-dlp.mjs"
+  },
+  "dependencies": {
+    "express": "^4.21.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

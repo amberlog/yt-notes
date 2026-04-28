@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>yt-notes</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>yt-notes</h1>
+      <nav>
+        <button data-tab="process" class="active">Process</button>
+        <button data-tab="groups">Groups</button>
+        <button data-tab="settings">Settings</button>
+      </nav>
+      <div id="health-banner"></div>
+    </header>
+
+    <main>
+      <!-- ======== Process ======== -->
+      <section id="tab-process" class="tab active">
+
+        <!-- Step indicator -->
+        <div class="steps">
+          <div class="step active" data-step="1"><div class="num"><span>1</span></div><div class="label">Download subs</div></div>
+          <div class="step" data-step="2"><div class="num"><span>2</span></div><div class="label">Pick transcripts</div></div>
+          <div class="step" data-step="3"><div class="num"><span>3</span></div><div class="label">Summarize</div></div>
+          <div class="step" data-step="4"><div class="num"><span>4</span></div><div class="label">Save to group</div></div>
+        </div>
+
+        <!-- ============ Step 1: Download ============ -->
+        <div class="card focused" id="card-1">
+          <h3 class="card-title">1. Download subtitles</h3>
+          <p class="card-subtitle">Pull subtitles from YouTube to local disk. Two input modes.</p>
+
+          <div class="mode-tabs">
+            <button type="button" data-mode="channel" class="active">Whole channel</button>
+            <button type="button" data-mode="video">Single video</button>
+          </div>
+
+          <!-- Mode A: channel -->
+          <div class="mode-pane active" id="mode-channel">
+            <p class="muted" style="margin:0 0 .8rem">Enter a YT channel + start date. Grabs all English subs for videos longer than 5 min.</p>
+            <form id="download-form" class="row">
+              <label
+                >YT channel handle
+                <input id="account" placeholder="@mkbhd or mkbhd" autocomplete="off" />
+              </label>
+              <label style="max-width:180px"
+                >Since date <span class="muted">(YYYYMMDD)</span>
+                <input id="sinceDate" placeholder="20250101" pattern="\d{8}" autocomplete="off" />
+              </label>
+              <button type="submit" id="dl-btn" class="large">Download</button>
+            </form>
+          </div>
+
+          <!-- Mode B: single video -->
+          <div class="mode-pane" id="mode-video">
+            <p class="muted" style="margin:0 0 .8rem">Paste a single video URL to grab its subtitles.</p>
+            <form id="download-video-form" class="row">
+              <label style="flex:2"
+                >Video URL
+                <input id="videoUrl" placeholder="https://www.youtube.com/watch?v=... or youtu.be/..." autocomplete="off" />
+              </label>
+              <button type="submit" id="dl-video-btn" class="large">Download</button>
+            </form>
+          </div>
+
+          <div id="download-progress"></div>
+          <div style="margin-top:.6rem">
+            <button type="button" id="cancel-btn" class="danger small" style="display:none">Cancel download</button>
+          </div>
+        </div>
+
+        <!-- ============ Step 2: Pick transcripts ============ -->
+        <div class="card" id="card-2">
+          <h3 class="card-title">2. Pick transcripts</h3>
+          <p class="card-subtitle">Select transcripts to send to the LLM (multi-select).</p>
+
+          <div id="store-account-picker"></div>
+          <div id="store-files">
+            <p class="muted" style="margin:.5rem 0">Once subtitles are downloaded, transcript files appear here.</p>
+          </div>
+        </div>
+
+        <!-- ============ Step 3: LLM ============ -->
+        <div class="card" id="card-3">
+          <h3 class="card-title">3. Summarize with LLM</h3>
+          <p class="card-subtitle">Use DeepSeek to turn selected transcripts into markdown notes.</p>
+
+          <label
+            >Prompt (leave empty to use default)
+            <textarea id="prompt" rows="5" placeholder="(loading...)"></textarea>
+          </label>
+
+          <div class="row" style="margin-top:.7rem">
+            <button id="process-btn" class="large" disabled>Summarize selected transcripts</button>
+            <span class="muted" style="align-self:center">First prompt you type is auto-saved as default</span>
+          </div>
+          <div id="process-progress"></div>
+        </div>
+
+        <!-- ============ Step 4: Result / Save ============ -->
+        <div class="card" id="card-4" style="display:none">
+          <h3 class="card-title">4. Result &amp; save</h3>
+          <p class="card-subtitle">Download .md or save to a group.</p>
+
+          <pre id="result"></pre>
+
+          <div class="card-section">
+            <h4>Save to group</h4>
+            <div class="row" id="result-actions">
+              <button id="download-result" class="secondary">Download .md</button>
+              <select id="save-group" style="max-width:200px">
+                <option value="">(no group)</option>
+              </select>
+              <input id="save-title" placeholder="Title (required)" />
+              <button id="save-result">Save to group</button>
+            </div>
+            <div id="save-status"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ======== Groups ======== -->
+      <section id="tab-groups" class="tab">
+        <div class="card">
+          <h3 class="card-title">Groups</h3>
+          <p class="card-subtitle">Organize notes into groups. Within a group you can multi-select items for re-curation.</p>
+          <form id="group-form" class="row">
+            <input id="group-name" placeholder="New group name (e.g. indie-hacker)" />
+            <button type="submit">New group</button>
+          </form>
+        </div>
+        <div id="groups-list"></div>
+      </section>
+
+      <!-- ======== Settings ======== -->
+      <section id="tab-settings" class="tab">
+        <div class="card">
+          <h3 class="card-title">DeepSeek API settings</h3>
+          <p class="card-subtitle">BYOK — your API key is stored only in the local SQLite DB, nowhere else.</p>
+
+          <label
+            >DeepSeek API Key
+            <input id="api-key" type="password" autocomplete="off" placeholder="sk-..." />
+          </label>
+          <label
+            >DeepSeek Model
+            <input id="deepseek-model" placeholder="deepseek-chat" />
+          </label>
+          <label
+            >Default prompt
+            <textarea id="default-prompt" rows="9"></textarea>
+          </label>
+          <div class="row">
+            <button id="save-settings">Save settings</button>
+            <span id="settings-status" class="muted" style="align-self:center"></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">Environment check</h3>
+          <div id="env-check"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Toast container -->
+    <div class="toasts" id="toasts"></div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
