@@ -19,12 +19,14 @@ function tokensFromText(text) {
   return Math.round(cjk * 1.3 + ascii * 0.25);
 }
 
-// When we only know file size in bytes (no content): pragmatic estimate
-//   1 CJK char ~ 3 bytes UTF-8, ~1.3 tokens -> ~0.45 tokens per byte
-//   1 ASCII char = 1 byte, ~0.25 tokens -> ~0.25 tokens per byte
-//   Use 0.3 tokens per byte as a reasonable upper-mid estimate.
+// When we only know file size in bytes (no content): pragmatic estimate.
+// yt-notes downloads English subs only (`--sub-lang en.*` in yt.ts), so
+// content is effectively ASCII: 1 char = 1 byte, ~0.25 tokens/char.
+// (For mixed CJK content the actual rate is ~0.45 tokens/byte. If you
+// manually drop non-English transcripts into store/, this estimate
+// will under-count.)
 function tokensFromBytes(bytes) {
-  return Math.round(bytes * 0.3);
+  return Math.round(bytes * 0.25);
 }
 
 function loadBadgeTokens(tokens) {
