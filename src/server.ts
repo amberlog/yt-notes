@@ -451,5 +451,3 @@ const PORT = Number(process.env.PORT || 3000);
 app.listen(PORT, () => {
   console.log('\n  yt-notes -> http://localhost:' + PORT + '\n');
 });
-  console.log('\n  yt-notes -> http://localhost:' + PORT + '\n');
-});
