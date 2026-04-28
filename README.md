@@ -30,7 +30,7 @@ Everything is stored locally: a single SQLite file plus a per-account folder of 
 ## Install & run
 
 ```bash
-git clone https://github.com/<your-handle>/yt-notes.git
+git clone https://github.com/amberlog/yt-notes.git
 cd yt-notes
 npm install        # this also downloads the yt-dlp binary into ./bin/
 npm run dev
